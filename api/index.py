@@ -8,7 +8,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 from typing import Literal
 
@@ -20,6 +20,11 @@ app = FastAPI()
 class GenerateRequest(BaseModel):
     store_name: str
     platform: Literal['eleme', 'meituan', 'both']
+
+
+@app.get("/")
+async def index():
+    return HTMLResponse(content=HTML_PAGE)
 
 
 @app.post("/api/generate")
@@ -38,3 +43,93 @@ async def generate_pdf(request: GenerateRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+HTML_PAGE = '''<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外卖活动方案生成器 - 呈尚策划</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <div class="max-w-xl mx-auto py-12 px-4">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-slate-800">外卖活动方案生成器</h1>
+            <p class="text-slate-500 mt-2">呈尚策划 - 专业外卖代运营服务商</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">店铺名称</label>
+                    <input type="text" id="storeName" placeholder="例如：霸王茶姬（春熙路店）"
+                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-3">目标平台</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="platform" value="meituan" checked class="hidden peer">
+                            <div class="p-4 border rounded-xl text-center peer-checked:border-yellow-500 peer-checked:bg-yellow-50">
+                                <div class="text-2xl mb-1">🟡</div>
+                                <div class="text-sm font-medium">美团</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="platform" value="eleme" class="hidden peer">
+                            <div class="p-4 border rounded-xl text-center peer-checked:border-blue-500 peer-checked:bg-blue-50">
+                                <div class="text-2xl mb-1">🔵</div>
+                                <div class="text-sm font-medium">饿了么</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="platform" value="both" class="hidden peer">
+                            <div class="p-4 border rounded-xl text-center peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
+                                <div class="text-2xl mb-1">🟣</div>
+                                <div class="text-sm font-medium">双平台</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <button onclick="generatePDF()" id="generateBtn"
+                    class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:opacity-90 transition">
+                    生成并下载 PDF
+                </button>
+                <div id="status" class="hidden p-4 rounded-xl text-sm"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+    async function generatePDF() {
+        const storeName = document.getElementById('storeName').value.trim();
+        const platform = document.querySelector('input[name="platform"]:checked').value;
+        const btn = document.getElementById('generateBtn');
+        const status = document.getElementById('status');
+        if (!storeName) { showStatus('请输入店铺名称', 'error'); return; }
+        btn.disabled = true; btn.textContent = '正在生成...';
+        status.classList.add('hidden');
+        try {
+            const res = await fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ store_name: storeName, platform: platform })
+            });
+            if (!res.ok) throw new Error('生成失败');
+            const blob = await res.blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = storeName + '_活动方案.pdf';
+            a.click();
+            showStatus('PDF 已生成并开始下载', 'success');
+        } catch (e) { showStatus('生成失败，请重试', 'error'); }
+        finally { btn.disabled = false; btn.textContent = '生成并下载 PDF'; }
+    }
+    function showStatus(msg, type) {
+        const s = document.getElementById('status');
+        s.textContent = msg;
+        s.className = 'p-4 rounded-xl text-sm ' + (type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600');
+    }
+    </script>
+</body>
+</html>'''

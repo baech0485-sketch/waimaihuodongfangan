@@ -1,8 +1,5 @@
 {
-  "buildCommand": "cd 前端UI && npm install && npm run build",
-  "outputDirectory": "前端UI/dist",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/api/index.py" }
   ]
 }
