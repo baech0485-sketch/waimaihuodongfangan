@@ -1,0 +1,13 @@
+# 外卖活动方案生成器 - Python 依赖
+# FastAPI 框架
+fastapi>=0.115.0
+uvicorn>=0.32.0
+
+# PDF 生成
+reportlab>=4.0.8
+
+# 数据验证
+pydantic>=2.10.0
+
+# 异步支持
+python-multipart>=0.0.9
