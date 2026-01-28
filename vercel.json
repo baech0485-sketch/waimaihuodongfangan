@@ -1,11 +1,6 @@
 {
   "buildCommand": "cd 前端UI && npm install && npm run build",
   "outputDirectory": "前端UI/dist",
-  "functions": {
-    "api/*.py": {
-      "runtime": "@vercel/python@3.0.0"
-    }
-  },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.py" },
     { "source": "/(.*)", "destination": "/index.html" }
