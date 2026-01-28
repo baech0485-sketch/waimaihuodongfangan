@@ -10,6 +10,7 @@ from reportlab.lib.units import cm, mm
 from reportlab.lib.colors import HexColor, white
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfgen import canvas
 from datetime import datetime
 
@@ -79,20 +80,66 @@ TIPS = [
 
 
 def register_chinese_fonts():
-    """注册中文字体"""
-    font_options = [
+    """注册中文字体，优先使用项目内置字体，其次系统字体，最后使用CID字体"""
+    # 内置字体文件名
+    font_filename = "NotoSansSC-Regular.ttf"
+
+    # 从环境变量获取字体目录
+    font_dir = os.environ.get('FONT_DIR', '')
+
+    # 获取当前文件目录
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # 可能的字体路径
+    bundled_font_paths = []
+
+    # 1. 环境变量指定的目录
+    if font_dir:
+        bundled_font_paths.append(os.path.join(font_dir, font_filename))
+
+    # 2. 项目根目录的fonts文件夹
+    possible_roots = [
+        os.path.dirname(os.path.dirname(os.path.dirname(current_dir))),
+        os.path.dirname(os.path.dirname(current_dir)),
+        os.path.dirname(current_dir),
+        os.getcwd(),
+    ]
+    for root in possible_roots:
+        bundled_font_paths.append(os.path.join(root, "fonts", font_filename))
+
+    # 系统字体路径
+    system_font_options = [
         ("C:/Windows/Fonts/msyh.ttc", "MSYH"),
         ("C:/Windows/Fonts/simhei.ttf", "SimHei"),
         ("/System/Library/Fonts/PingFang.ttc", "PingFang"),
         ("/usr/share/fonts/truetype/wqy/wqy-microhei.ttc", "WQY"),
     ]
-    for font_path, font_name in font_options:
+
+    # 1. 尝试内置字体
+    for font_path in bundled_font_paths:
+        if os.path.exists(font_path):
+            try:
+                pdfmetrics.registerFont(TTFont("BundledChinese", font_path))
+                return "BundledChinese"
+            except:
+                continue
+
+    # 2. 尝试系统字体
+    for font_path, font_name in system_font_options:
         if os.path.exists(font_path):
             try:
                 pdfmetrics.registerFont(TTFont(font_name, font_path))
                 return font_name
             except:
                 continue
+
+    # 3. 使用reportlab内置的CID字体（支持中文）
+    try:
+        pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
+        return 'STSong-Light'
+    except:
+        pass
+
     return "Helvetica"
 
 
