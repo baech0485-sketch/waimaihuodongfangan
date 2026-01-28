@@ -144,16 +144,69 @@ HTML_PAGE = '''<!DOCTYPE html>
         </div>
     </div>
     <script>
+    // ============ Tauri/Web 双环境兼容工具 ============
+    function isTauriEnvironment() {
+        return typeof window !== 'undefined' &&
+               typeof window.__TAURI__ !== 'undefined' &&
+               typeof window.__TAURI__.core !== 'undefined' &&
+               typeof window.__TAURI__.core.invoke === 'function';
+    }
+
+    async function showTauriSaveDialog(filename) {
+        return await window.__TAURI__.core.invoke('plugin:dialog|save', {
+            options: {
+                defaultPath: filename,
+                title: '保存 PDF 文件',
+                filters: [
+                    { name: 'PDF 文件', extensions: ['pdf'] },
+                    { name: '所有文件', extensions: ['*'] }
+                ]
+            }
+        });
+    }
+
+    async function writeTauriFile(filePath, bytes) {
+        await window.__TAURI__.core.invoke(
+            'plugin:fs|write_file',
+            bytes,
+            {
+                headers: {
+                    path: encodeURIComponent(filePath),
+                    options: JSON.stringify({})
+                }
+            }
+        );
+    }
+
+    // ============ 浏览器下载 ============
+    function browserDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // ============ 主函数 ============
     async function generatePDF() {
         const storeName = document.getElementById('storeName').value.trim();
         const platform = document.querySelector('input[name="platform"]:checked').value;
         const btn = document.getElementById('generateBtn');
         const status = document.getElementById('status');
+        const filename = storeName + '_活动方案.pdf';
+
         if (!storeName) { showStatus('请输入店铺名称', 'error'); return; }
-        btn.disabled = true; btn.textContent = '正在生成...';
+
+        btn.disabled = true;
+        btn.textContent = '正在生成...';
         btn.classList.add('opacity-70');
         status.classList.add('hidden');
+
         try {
+            // 1. 调用API生成PDF
             const res = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -161,19 +214,48 @@ HTML_PAGE = '''<!DOCTYPE html>
             });
             if (!res.ok) throw new Error('生成失败');
             const blob = await res.blob();
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = storeName + '_活动方案.pdf';
-            a.click();
-            showStatus('PDF 已生成并开始下载', 'success');
-        } catch (e) { showStatus('生成失败，请重试', 'error'); }
-        finally { btn.disabled = false; btn.textContent = '生成活动方案 PDF'; btn.classList.remove('opacity-70'); }
+
+            // 2. 根据环境选择下载方式
+            if (isTauriEnvironment()) {
+                // Tauri 环境：显示保存对话框
+                console.log('[Tauri] 检测到 Tauri 环境，使用原生保存对话框');
+                const filePath = await showTauriSaveDialog(filename);
+                if (!filePath) {
+                    showStatus('已取消保存', 'error');
+                    return;
+                }
+                // 转换 Blob 为 Uint8Array
+                const arrayBuffer = await blob.arrayBuffer();
+                const bytes = new Uint8Array(arrayBuffer);
+                await writeTauriFile(filePath, bytes);
+                showStatus('PDF 已保存到: ' + filePath, 'success');
+            } else {
+                // 浏览器环境：直接下载
+                console.log('[Browser] 使用浏览器下载');
+                browserDownload(blob, filename);
+                showStatus('PDF 已生成并开始下载', 'success');
+            }
+        } catch (e) {
+            console.error('导出失败:', e);
+            showStatus('生成失败，请重试: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '生成活动方案 PDF';
+            btn.classList.remove('opacity-70');
+        }
     }
+
     function showStatus(msg, type) {
         const s = document.getElementById('status');
         s.textContent = msg;
         s.className = 'p-4 rounded-xl text-sm text-center ' + (type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600');
     }
+
+    // 页面加载时显示当前环境
+    document.addEventListener('DOMContentLoaded', function() {
+        const env = isTauriEnvironment() ? 'Tauri 桌面应用' : '浏览器';
+        console.log('当前运行环境:', env);
+    });
     </script>
 </body>
 </html>'''
