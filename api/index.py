@@ -52,52 +52,90 @@ HTML_PAGE = '''<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>外卖活动方案生成器 - 呈尚策划</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    brand: { dark: '#1A1A2E', gold: '#C9A962', cream: '#F5F0E8' },
+                    meituan: { primary: '#FFD000', bg: '#FFF8E1' },
+                    eleme: { primary: '#0097FF', bg: '#E6F4FF' }
+                }
+            }
+        }
+    }
+    </script>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600&display=swap');
+    .font-serif-cn { font-family: 'Noto Serif SC', serif; }
+    .stamp { border: 3px solid #C9A962; border-radius: 4px; padding: 4px 12px; transform: rotate(-3deg); }
+    .glass { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
-    <div class="max-w-xl mx-auto py-12 px-4">
-        <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-slate-800">外卖活动方案生成器</h1>
-            <p class="text-slate-500 mt-2">呈尚策划 - 专业外卖代运营服务商</p>
+<body class="min-h-screen bg-brand-dark">
+    <!-- 背景装饰 -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-brand-gold/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-brand-gold/5 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="relative max-w-lg mx-auto py-12 px-4">
+        <!-- 品牌头部 -->
+        <div class="text-center mb-10">
+            <div class="inline-block stamp mb-4">
+                <span class="font-serif-cn text-brand-gold text-xl tracking-widest">呈尚策划</span>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">外卖活动方案</h1>
+            <p class="text-brand-gold/70 text-sm">专业外卖代运营 · 一键生成活动策划</p>
         </div>
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <!-- 主卡片 -->
+        <div class="glass rounded-3xl p-8 shadow-2xl border border-white/20">
             <div class="space-y-6">
+                <!-- 店铺名称输入 -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">店铺名称</label>
+                    <label class="block text-sm font-semibold text-brand-dark mb-2">店铺名称</label>
                     <input type="text" id="storeName" placeholder="例如：霸王茶姬（春熙路店）"
-                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-4 py-3.5 bg-brand-cream/50 border-2 border-transparent rounded-xl focus:outline-none focus:border-brand-gold focus:bg-white transition-all text-brand-dark placeholder-brand-dark/40">
                 </div>
+
+                <!-- 平台选择 -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-3">目标平台</label>
+                    <label class="block text-sm font-semibold text-brand-dark mb-3">目标平台</label>
                     <div class="grid grid-cols-3 gap-3">
                         <label class="cursor-pointer">
                             <input type="radio" name="platform" value="meituan" checked class="hidden peer">
-                            <div class="p-4 border rounded-xl text-center peer-checked:border-yellow-500 peer-checked:bg-yellow-50">
-                                <div class="text-2xl mb-1">🟡</div>
-                                <div class="text-sm font-medium">美团</div>
+                            <div class="p-4 border-2 border-gray-200 rounded-xl text-center peer-checked:border-meituan-primary peer-checked:bg-meituan-bg transition-all">
+                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-meituan-primary flex items-center justify-center text-white font-bold">美</div>
+                                <div class="text-sm font-medium text-brand-dark">美团</div>
                             </div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="platform" value="eleme" class="hidden peer">
-                            <div class="p-4 border rounded-xl text-center peer-checked:border-blue-500 peer-checked:bg-blue-50">
-                                <div class="text-2xl mb-1">🔵</div>
-                                <div class="text-sm font-medium">饿了么</div>
+                            <div class="p-4 border-2 border-gray-200 rounded-xl text-center peer-checked:border-eleme-primary peer-checked:bg-eleme-bg transition-all">
+                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-eleme-primary flex items-center justify-center text-white font-bold">饿</div>
+                                <div class="text-sm font-medium text-brand-dark">饿了么</div>
                             </div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="platform" value="both" class="hidden peer">
-                            <div class="p-4 border rounded-xl text-center peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
-                                <div class="text-2xl mb-1">🟣</div>
-                                <div class="text-sm font-medium">双平台</div>
+                            <div class="p-4 border-2 border-gray-200 rounded-xl text-center peer-checked:border-brand-gold peer-checked:bg-brand-cream transition-all">
+                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-gradient-to-r from-meituan-primary to-eleme-primary flex items-center justify-center text-white font-bold text-xs">双</div>
+                                <div class="text-sm font-medium text-brand-dark">双平台</div>
                             </div>
                         </label>
                     </div>
                 </div>
                 <button onclick="generatePDF()" id="generateBtn"
-                    class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:opacity-90 transition">
-                    生成并下载 PDF
+                    class="w-full py-4 bg-brand-dark text-brand-gold font-semibold rounded-xl hover:bg-brand-dark/90 transition-all shadow-lg">
+                    生成活动方案 PDF
                 </button>
-                <div id="status" class="hidden p-4 rounded-xl text-sm"></div>
+                <div id="status" class="hidden p-4 rounded-xl text-sm text-center"></div>
             </div>
+        </div>
+
+        <!-- 底部说明 -->
+        <div class="mt-8 text-center text-brand-gold/50 text-xs">
+            <p>方案包含：爆单红包 · 减配送费 · 返券活动 · 效果预期</p>
         </div>
     </div>
     <script>
@@ -108,6 +146,7 @@ HTML_PAGE = '''<!DOCTYPE html>
         const status = document.getElementById('status');
         if (!storeName) { showStatus('请输入店铺名称', 'error'); return; }
         btn.disabled = true; btn.textContent = '正在生成...';
+        btn.classList.add('opacity-70');
         status.classList.add('hidden');
         try {
             const res = await fetch('/api/generate', {
@@ -123,12 +162,12 @@ HTML_PAGE = '''<!DOCTYPE html>
             a.click();
             showStatus('PDF 已生成并开始下载', 'success');
         } catch (e) { showStatus('生成失败，请重试', 'error'); }
-        finally { btn.disabled = false; btn.textContent = '生成并下载 PDF'; }
+        finally { btn.disabled = false; btn.textContent = '生成活动方案 PDF'; btn.classList.remove('opacity-70'); }
     }
     function showStatus(msg, type) {
         const s = document.getElementById('status');
         s.textContent = msg;
-        s.className = 'p-4 rounded-xl text-sm ' + (type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600');
+        s.className = 'p-4 rounded-xl text-sm text-center ' + (type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600');
     }
     </script>
 </body>
