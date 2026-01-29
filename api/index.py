@@ -77,11 +77,12 @@ HTML_PAGE = '''<!DOCTYPE html>
     .glass { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="min-h-screen bg-brand-dark">
+<body class="min-h-screen bg-gradient-to-br from-brand-cream to-white">
     <!-- 背景装饰 -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-brand-gold/5 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 w-80 h-80 bg-brand-gold/5 rounded-full blur-3xl"></div>
+        <div class="absolute top-0 right-0 w-96 h-96 bg-brand-gold/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-eleme-primary/5 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-meituan-primary/5 rounded-full blur-3xl"></div>
     </div>
 
     <div class="relative max-w-lg mx-auto py-12 px-4">
@@ -90,11 +91,11 @@ HTML_PAGE = '''<!DOCTYPE html>
             <div class="inline-block stamp mb-4">
                 <span class="font-serif-cn text-brand-gold text-xl tracking-widest">呈尚策划</span>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2">外卖活动方案</h1>
-            <p class="text-brand-gold/70 text-sm">专业外卖代运营 · 一键生成活动策划</p>
+            <h1 class="text-3xl font-bold text-brand-dark mb-2">外卖活动方案</h1>
+            <p class="text-gray-500 text-sm">专业外卖代运营 · 一键生成活动策划</p>
         </div>
         <!-- 主卡片 -->
-        <div class="glass rounded-3xl p-8 shadow-2xl border border-white/20">
+        <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
             <div class="space-y-6">
                 <!-- 店铺名称输入 -->
                 <div>
@@ -131,7 +132,7 @@ HTML_PAGE = '''<!DOCTYPE html>
                     </div>
                 </div>
                 <button onclick="generatePDF()" id="generateBtn"
-                    class="w-full py-4 bg-brand-dark text-brand-gold font-semibold rounded-xl hover:bg-brand-dark/90 transition-all shadow-lg">
+                    class="w-full py-4 bg-brand-gold text-white font-semibold rounded-xl hover:bg-brand-gold/90 transition-all shadow-lg">
                     生成活动方案 PDF
                 </button>
                 <div id="status" class="hidden p-4 rounded-xl text-sm text-center"></div>
@@ -139,7 +140,7 @@ HTML_PAGE = '''<!DOCTYPE html>
         </div>
 
         <!-- 底部说明 -->
-        <div class="mt-8 text-center text-brand-gold/50 text-xs">
+        <div class="mt-8 text-center text-gray-400 text-xs">
             <p>方案包含：爆单红包 · 减配送费 · 返券活动 · 效果预期</p>
         </div>
     </div>
