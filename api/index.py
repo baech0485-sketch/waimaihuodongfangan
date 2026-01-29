@@ -143,6 +143,31 @@ HTML_PAGE = '''<!DOCTYPE html>
         <div class="mt-8 text-center text-gray-400 text-xs">
             <p>方案包含：爆单红包 · 减配送费 · 返券活动 · 效果预期</p>
         </div>
+
+        <!-- 话术展示框 -->
+        <div class="mt-8 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">💬</span>
+                    <h3 class="font-semibold text-brand-dark">客户沟通话术</h3>
+                </div>
+                <button onclick="copyScript()" id="copyBtn"
+                    class="px-4 py-1.5 text-sm bg-brand-cream text-brand-dark rounded-lg hover:bg-brand-gold hover:text-white transition-all flex items-center gap-1">
+                    <span id="copyIcon">📋</span>
+                    <span id="copyText">点击复制</span>
+                </button>
+            </div>
+            <div id="scriptContent" class="text-sm text-gray-600 leading-relaxed space-y-3 cursor-pointer hover:bg-brand-cream/30 p-4 rounded-xl transition-all" onclick="copyScript()">
+                <p>老板，您店铺的活动方案我们已经发到群里了，您可以先看一下。</p>
+                <p>这个方案是我们根据您店铺的数据情况和周边商圈的竞争环境来设计的，包括<span class="text-brand-gold font-medium">满减门槛、折扣力度、活动时段</span>这些都是经过测算的，既能吸引客户下单，又能保证您的利润空间不会被压得太低。</p>
+                <p>我们会按照这个方案来调整您店铺的活动设置，调整完成后平台算法会重新识别您的活动数据，配合我们之前优化的<span class="text-brand-gold font-medium">关键词和商品权重</span>，曝光和转化都会有提升。</p>
+                <p>活动上线后我们会持续盯着数据表现，如果某个活动的转化效果特别好我们会加大力度，效果不理想的我们也会及时调整策略。</p>
+                <p>您这边如果对方案有什么想法或者疑问，随时跟我们说，我们可以根据您的实际情况做微调。</p>
+            </div>
+            <div id="copyStatus" class="hidden mt-3 text-center text-sm text-green-600 bg-green-50 py-2 rounded-lg">
+                ✓ 已复制到剪贴板
+            </div>
+        </div>
     </div>
     <script>
     // ============ Tauri/Web 双环境兼容工具 ============
@@ -250,6 +275,41 @@ HTML_PAGE = '''<!DOCTYPE html>
         const s = document.getElementById('status');
         s.textContent = msg;
         s.className = 'p-4 rounded-xl text-sm text-center ' + (type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600');
+    }
+
+    // ============ 话术复制功能 ============
+    const SCRIPT_TEXT = `老板，您店铺的活动方案我们已经发到群里了，您可以先看一下。
+
+这个方案是我们根据您店铺的数据情况和周边商圈的竞争环境来设计的，包括满减门槛、折扣力度、活动时段这些都是经过测算的，既能吸引客户下单，又能保证您的利润空间不会被压得太低。
+
+我们会按照这个方案来调整您店铺的活动设置，调整完成后平台算法会重新识别您的活动数据，配合我们之前优化的关键词和商品权重，曝光和转化都会有提升。
+
+活动上线后我们会持续盯着数据表现，如果某个活动的转化效果特别好我们会加大力度，效果不理想的我们也会及时调整策略。
+
+您这边如果对方案有什么想法或者疑问，随时跟我们说，我们可以根据您的实际情况做微调。`;
+
+    async function copyScript() {
+        try {
+            await navigator.clipboard.writeText(SCRIPT_TEXT);
+            // 显示复制成功状态
+            const copyStatus = document.getElementById('copyStatus');
+            const copyText = document.getElementById('copyText');
+            const copyIcon = document.getElementById('copyIcon');
+
+            copyStatus.classList.remove('hidden');
+            copyText.textContent = '已复制';
+            copyIcon.textContent = '✓';
+
+            // 2秒后恢复
+            setTimeout(() => {
+                copyStatus.classList.add('hidden');
+                copyText.textContent = '点击复制';
+                copyIcon.textContent = '📋';
+            }, 2000);
+        } catch (err) {
+            console.error('复制失败:', err);
+            alert('复制失败，请手动选择文字复制');
+        }
     }
 
     // 页面加载时显示当前环境
