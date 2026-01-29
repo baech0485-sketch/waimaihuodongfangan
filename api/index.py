@@ -277,7 +277,7 @@ HTML_PAGE = '''<!DOCTYPE html>
         s.className = 'p-4 rounded-xl text-sm text-center ' + (type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600');
     }
 
-    // ============ 话术复制功能 ============
+    // ============ 话术复制功能（Tauri/Web双环境兼容） ============
     const SCRIPT_TEXT = `老板，您店铺的活动方案我们已经发到群里了，您可以先看一下。
 
 这个方案是我们根据您店铺的数据情况和周边商圈的竞争环境来设计的，包括满减门槛、折扣力度、活动时段这些都是经过测算的，既能吸引客户下单，又能保证您的利润空间不会被压得太低。
@@ -288,26 +288,68 @@ HTML_PAGE = '''<!DOCTYPE html>
 
 您这边如果对方案有什么想法或者疑问，随时跟我们说，我们可以根据您的实际情况做微调。`;
 
-    async function copyScript() {
-        try {
-            await navigator.clipboard.writeText(SCRIPT_TEXT);
-            // 显示复制成功状态
-            const copyStatus = document.getElementById('copyStatus');
-            const copyText = document.getElementById('copyText');
-            const copyIcon = document.getElementById('copyIcon');
+    // 降级方案：使用 execCommand
+    function fallbackCopyToClipboard(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.cssText = 'position:fixed;left:0;top:0;width:2em;height:2em;opacity:0;z-index:-1';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+        let success = false;
+        try { success = document.execCommand('copy'); } catch (e) { }
+        document.body.removeChild(textarea);
+        return success;
+    }
 
+    // 通用复制函数 - 支持 Tauri 和浏览器
+    async function copyToClipboard(text) {
+        // 1. Tauri 环境 - 尝试原生 API
+        if (isTauriEnvironment() && window.__TAURI__?.core?.invoke) {
+            try {
+                await window.__TAURI__.core.invoke('plugin:clipboard-manager|write_text', { text });
+                console.log('[Tauri] 剪贴板复制成功');
+                return true;
+            } catch (e) {
+                console.warn('[Tauri] 原生API失败，使用降级方案:', e);
+                return fallbackCopyToClipboard(text);
+            }
+        }
+        // 2. Tauri WebView 但无法使用 API - 直接降级
+        if (isTauriEnvironment()) {
+            return fallbackCopyToClipboard(text);
+        }
+        // 3. 浏览器环境 - 尝试 Clipboard API
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(text);
+                console.log('[Browser] Clipboard API 复制成功');
+                return true;
+            }
+        } catch (e) {
+            console.warn('[Browser] Clipboard API 失败:', e);
+        }
+        // 4. 最终降级
+        return fallbackCopyToClipboard(text);
+    }
+
+    async function copyScript() {
+        const success = await copyToClipboard(SCRIPT_TEXT);
+        const copyStatus = document.getElementById('copyStatus');
+        const copyText = document.getElementById('copyText');
+        const copyIcon = document.getElementById('copyIcon');
+
+        if (success) {
             copyStatus.classList.remove('hidden');
             copyText.textContent = '已复制';
             copyIcon.textContent = '✓';
-
-            // 2秒后恢复
             setTimeout(() => {
                 copyStatus.classList.add('hidden');
                 copyText.textContent = '点击复制';
                 copyIcon.textContent = '📋';
             }, 2000);
-        } catch (err) {
-            console.error('复制失败:', err);
+        } else {
             alert('复制失败，请手动选择文字复制');
         }
     }
