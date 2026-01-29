@@ -148,12 +148,18 @@ HTML_PAGE = '''<!DOCTYPE html>
         <div class="mt-8 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
-                    <span class="text-lg">💬</span>
+                    <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
                     <h3 class="font-semibold text-brand-dark">客户沟通话术</h3>
                 </div>
                 <button onclick="copyScript()" id="copyBtn"
-                    class="px-4 py-1.5 text-sm bg-brand-cream text-brand-dark rounded-lg hover:bg-brand-gold hover:text-white transition-all flex items-center gap-1">
-                    <span id="copyIcon">📋</span>
+                    class="px-4 py-1.5 text-sm bg-brand-cream text-brand-dark rounded-lg hover:bg-brand-gold hover:text-white transition-all flex items-center gap-1.5">
+                    <span id="copyIcon">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                        </svg>
+                    </span>
                     <span id="copyText">点击复制</span>
                 </button>
             </div>
@@ -164,8 +170,11 @@ HTML_PAGE = '''<!DOCTYPE html>
                 <p>活动上线后我们会持续盯着数据表现，如果某个活动的转化效果特别好我们会加大力度，效果不理想的我们也会及时调整策略。</p>
                 <p>您这边如果对方案有什么想法或者疑问，随时跟我们说，我们可以根据您的实际情况做微调。</p>
             </div>
-            <div id="copyStatus" class="hidden mt-3 text-center text-sm text-green-600 bg-green-50 py-2 rounded-lg">
-                ✓ 已复制到剪贴板
+            <div id="copyStatus" class="hidden mt-3 text-center text-sm text-green-600 bg-green-50 py-2 rounded-lg flex items-center justify-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>已复制到剪贴板</span>
             </div>
         </div>
     </div>
@@ -334,6 +343,10 @@ HTML_PAGE = '''<!DOCTYPE html>
         return fallbackCopyToClipboard(text);
     }
 
+    // SVG图标定义
+    const ICON_CLIPBOARD = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>';
+    const ICON_CHECK = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+
     async function copyScript() {
         const success = await copyToClipboard(SCRIPT_TEXT);
         const copyStatus = document.getElementById('copyStatus');
@@ -343,11 +356,11 @@ HTML_PAGE = '''<!DOCTYPE html>
         if (success) {
             copyStatus.classList.remove('hidden');
             copyText.textContent = '已复制';
-            copyIcon.textContent = '✓';
+            copyIcon.innerHTML = ICON_CHECK;
             setTimeout(() => {
                 copyStatus.classList.add('hidden');
                 copyText.textContent = '点击复制';
-                copyIcon.textContent = '📋';
+                copyIcon.innerHTML = ICON_CLIPBOARD;
             }, 2000);
         } else {
             alert('复制失败，请手动选择文字复制');
