@@ -10,7 +10,6 @@ from reportlab.lib.units import cm, mm
 from reportlab.lib.colors import HexColor, white
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfgen import canvas
 from datetime import datetime
 
@@ -80,9 +79,11 @@ TIPS = [
 
 
 def register_chinese_fonts():
-    """注册中文字体，优先使用项目内置字体，其次系统字体，最后使用CID字体"""
-    # 内置字体文件名
-    font_filename = "NotoSansSC-Regular.ttf"
+    """注册可嵌入的中文字体，避免移动端 PDF 预览乱码。"""
+    bundled_font_filenames = (
+        "wqy-microhei.ttc",
+        "NotoSansSC-Regular.ttf",
+    )
 
     # 从环境变量获取字体目录
     font_dir = os.environ.get('FONT_DIR', '')
@@ -95,7 +96,8 @@ def register_chinese_fonts():
 
     # 1. 环境变量指定的目录
     if font_dir:
-        bundled_font_paths.append(os.path.join(font_dir, font_filename))
+        for font_filename in bundled_font_filenames:
+            bundled_font_paths.append(os.path.join(font_dir, font_filename))
 
     # 2. 项目根目录的fonts文件夹
     possible_roots = [
@@ -105,7 +107,8 @@ def register_chinese_fonts():
         os.getcwd(),
     ]
     for root in possible_roots:
-        bundled_font_paths.append(os.path.join(root, "fonts", font_filename))
+        for font_filename in bundled_font_filenames:
+            bundled_font_paths.append(os.path.join(root, "fonts", font_filename))
 
     # 系统字体路径
     system_font_options = [
@@ -115,13 +118,21 @@ def register_chinese_fonts():
         ("/usr/share/fonts/truetype/wqy/wqy-microhei.ttc", "WQY"),
     ]
 
+    font_errors = []
+    seen_paths = set()
+
     # 1. 尝试内置字体
     for font_path in bundled_font_paths:
+        normalized_path = os.path.abspath(font_path)
+        if normalized_path in seen_paths:
+            continue
+        seen_paths.add(normalized_path)
         if os.path.exists(font_path):
             try:
                 pdfmetrics.registerFont(TTFont("BundledChinese", font_path))
                 return "BundledChinese"
-            except:
+            except Exception as e:
+                font_errors.append(f"{font_path}: {e}")
                 continue
 
     # 2. 尝试系统字体
@@ -130,17 +141,12 @@ def register_chinese_fonts():
             try:
                 pdfmetrics.registerFont(TTFont(font_name, font_path))
                 return font_name
-            except:
+            except Exception as e:
+                font_errors.append(f"{font_path}: {e}")
                 continue
 
-    # 3. 使用reportlab内置的CID字体（支持中文）
-    try:
-        pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
-        return 'STSong-Light'
-    except:
-        pass
-
-    return "Helvetica"
+    detail = "; ".join(font_errors) if font_errors else "未找到中文字体文件"
+    raise RuntimeError(f"未找到可嵌入的中文字体，无法生成可靠的中文PDF: {detail}")
 
 
 def draw_brand_header(c, current_y, font_name):
