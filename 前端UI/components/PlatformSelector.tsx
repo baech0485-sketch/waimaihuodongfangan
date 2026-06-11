@@ -1,6 +1,7 @@
 import React from 'react';
 import { Platform } from '../types';
-import { ShoppingBag, ShoppingCart, Layers } from 'lucide-react';
+import { PLATFORMS } from '../constants';
+import { Check } from 'lucide-react';
 
 interface PlatformSelectorProps {
   selected: Platform;
@@ -8,47 +9,36 @@ interface PlatformSelectorProps {
 }
 
 const PlatformSelector: React.FC<PlatformSelectorProps> = ({ selected, onChange }) => {
-  
-  const options = [
-    { id: Platform.MEITUAN, label: '美团外卖', icon: ShoppingBag, color: 'text-yellow-500' },
-    { id: Platform.ELEME, label: '饿了么', icon: ShoppingCart, color: 'text-blue-500' },
-    { id: Platform.BOTH, label: '双平台', icon: Layers, color: 'text-indigo-500' },
-  ];
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
-      {options.map((opt) => {
+    <div
+      role="radiogroup"
+      aria-label="目标平台"
+      className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+    >
+      {PLATFORMS.map((opt) => {
         const isSelected = selected === opt.id;
-        const Icon = opt.icon;
-        
-        return (
-          <div
-            key={opt.id}
-            onClick={() => onChange(opt.id)}
-            className={`
-              relative group cursor-pointer rounded-xl p-4 border transition-all duration-300
-              flex flex-col items-center justify-center gap-2
-              ${isSelected 
-                ? 'bg-white border-primary-500 shadow-lg shadow-primary-500/10' 
-                : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-white'}
-            `}
-          >
-            {/* Active Indicator Dot */}
-            {isSelected && (
-              <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-500 animate-pulse" />
-            )}
 
-            <div className={`
-              p-2.5 rounded-lg transition-colors duration-300
-              ${isSelected ? 'bg-primary-50' : 'bg-white shadow-sm'}
-            `}>
-              <Icon size={20} className={isSelected ? opt.color : 'text-slate-400'} />
-            </div>
-            
-            <span className={`font-semibold text-sm ${isSelected ? 'text-slate-800' : 'text-slate-500'}`}>
-              {opt.label}
-            </span>
-          </div>
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            role="radio"
+            aria-checked={isSelected}
+            onClick={() => onChange(opt.id)}
+            className={`relative flex flex-col items-start gap-1 rounded-lg border p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20 ${
+              isSelected
+                ? 'border-foreground bg-subtle'
+                : 'border-border bg-background hover:border-foreground/40'
+            }`}
+          >
+            {isSelected && (
+              <span className="absolute right-3 top-3 flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-background">
+                <Check size={11} strokeWidth={3} />
+              </span>
+            )}
+            <span className="text-sm font-semibold text-foreground">{opt.label}</span>
+            <span className="text-xs text-muted">{opt.description}</span>
+          </button>
         );
       })}
     </div>

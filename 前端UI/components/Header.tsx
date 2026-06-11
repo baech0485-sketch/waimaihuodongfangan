@@ -1,31 +1,35 @@
 import React from 'react';
-import { Zap } from 'lucide-react';
 
 const Header: React.FC = () => {
   return (
-    <nav className="w-full bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-br from-primary-500 to-secondary-500 text-white p-1.5 rounded-lg shadow-lg shadow-primary-500/30">
-              <Zap size={20} fill="currentColor" />
-            </div>
-            <span className="font-bold text-xl tracking-tight text-slate-800">
-              呈尚<span className="text-slate-400">策划</span>
-            </span>
-            <span className="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-700 ml-2">
-              AI 驱动
-            </span>
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background">
+            {/* Vercel-style triangle mark */}
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+              <path d="M12 3 22 20H2L12 3Z" />
+            </svg>
           </div>
-          
-          <div className="flex items-center gap-4">
-             <a href="#" className="text-sm font-medium text-slate-500 hover:text-primary-600 transition-colors">帮助文档</a>
-             <div className="h-4 w-px bg-slate-200"></div>
-             <span className="text-sm text-slate-400">v2.0.0</span>
-          </div>
+          <span className="text-[15px] font-semibold tracking-tight text-foreground">
+            呈尚策划
+          </span>
+          <span className="hidden items-center rounded-full border border-border px-2 py-0.5 text-xs font-medium text-muted sm:inline-flex">
+            活动方案引擎
+          </span>
         </div>
+
+        <nav className="flex items-center gap-5">
+          <a
+            href="#plan-content"
+            className="text-sm font-medium text-muted transition-colors hover:text-foreground"
+          >
+            方案说明
+          </a>
+          <span className="font-mono text-xs text-muted">v2.0.0</span>
+        </nav>
       </div>
-    </nav>
+    </header>
   );
 };
 
